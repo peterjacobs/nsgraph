@@ -47,8 +47,10 @@ def read_conf(config_file):
         g.node_attr.update(shape="record", fontname="arial")
         with open(config_file) as cfile:
                 for l in cfile:
+                        if l == "Done":
+                            continue
                         all_lines.append(l)
-                        f = string.split(l)
+                        f = l.split()
                         if "add server" in l:
                                 summary['srv'].add(f[2])
                                 g.add_node("srv-" + f[2],label=f[2] + " | " + f[3])
@@ -123,7 +125,10 @@ def read_conf(config_file):
                                 g.add_edge("vpn-"+f[3], "pol-"+f[5])
                         elif "add rewrite action" in l:
                                 summary['act'].add(f[3])
-                                g.add_node("rwact-" + f[3], label=f[3]+" | type:" + f[4] + " | " + re.sub(RE_GOOD_CHARS,'',f[5]) + " | " + re.sub(RE_GOOD_CHARS,'',f[6]))
+                                try:
+                                  g.add_node("rwact-" + f[3], label=f[3]+" | type:" + f[4] + " | " + re.sub(RE_GOOD_CHARS,'',f[5]) + " | " + re.sub(RE_GOOD_CHARS,'',f[6]))
+                                except Exception as exception:
+                                  g.add_node("rwact-" + f[3], label=f[3]+" | type:" + f[4] + " | " + re.sub(RE_GOOD_CHARS,'',f[5]) + " | " + re.sub(RE_GOOD_CHARS,'',"missing-value"))
                         elif "add rewrite policy" in l and not "policylabel" in l:
                                 summary['pol'].add(f[3])
                                 g.add_node("pol-"+f[3],label=f[3] + " | rule:" + re.sub(RE_GOOD_CHARS,'',f[4]))
@@ -239,36 +244,36 @@ def main(argv):
         if output_file == "":
                 output_file = config_file + "." + output_format
 
-        print "Parsing config file " + config_file
-        print "Exporting to file " + output_file
+        print( "Parsing config file " + config_file)
+        print( "Exporting to file " + output_file)
 
         graph = read_conf(config_file)
-        print "File length: " + `len(all_lines)` + " lines."
-        print "Not processed: " + `len(not_processed)` + " lines."
+        print( "File length: %d lines." % len(all_lines) )
+        print( "Not processed: %d lines." % len(not_processed) )
         if view_not_processed:
-                print " "
+                print( " ")
                 pprint.pprint(not_processed)
         if view_source:
-                print " "
-                print"" + graph.string()
+                print( " ")
+                print("" + graph.string())
                 graph.write(config_file + ".dot")
         if reduce_vip != "":
-                print "Reducing for VIP " + reduce_vip
+                print( "Reducing for VIP " + reduce_vip)
                 graph = reduce(graph, "vip-" + reduce_vip)
-        print ""
+        print( "")
         graph.draw(output_file, format=output_format, prog="dot")	
 
 
 
 def usage():
-        print "Usage: python nsparse.py -c configfile [-o outputfile] [-f format] [-u] [-s] [-v vip]"
-        print "  -c    Input config.ns file."
-        print "  -o    Output DOT file. The PDF file has the same name with .pdf extension"
-        print "        If not specified, the input name is reused with .gv extension"
-        print "  -f    Format; one of pdf, jpg, png, gif, svg or gv"
-        print "  -u    Print unprocessed lines."
-        print "  -s    Print graph source."
-        print "  -v    Reduce a graph to only objects related to a VIP."
+        print( "Usage: python nsparse.py -c configfile [-o outputfile] [-f format] [-u] [-s] [-v vip]")
+        print( "  -c    Input config.ns file.")
+        print( "  -o    Output DOT file. The PDF file has the same name with .pdf extension")
+        print( "        If not specified, the input name is reused with .gv extension")
+        print( "  -f    Format; one of pdf, jpg, png, gif, svg or gv")
+        print( "  -u    Print unprocessed lines.")
+        print( "  -s    Print graph source.")
+        print( "  -v    Reduce a graph to only objects related to a VIP.")
 
 if __name__ == "__main__":
         main(sys.argv[1:])
