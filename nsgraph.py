@@ -162,6 +162,10 @@ def read_conf(config_file):
                                         g.add_edge("csvs-"+f[3],"cert-"+f[5])
                                 if f[3] in summary['vpn']:
                                         g.add_edge("vpn-"+f[3],"cert-"+f[5])
+                        elif "bind ssl vserver" in l and ("-eccCurveName" in l or "-cipherName" in l):
+                                pass
+                        elif "set ssl vserver " in l:
+                                pass
                         else:
                                 not_processed.append(l)
         return g
