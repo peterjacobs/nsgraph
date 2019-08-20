@@ -166,6 +166,10 @@ def read_conf(config_file):
                                 pass
                         elif "set ssl vserver " in l:
                                 pass
+                        elif "bind ssl serviceGroup" in l and ("-eccCurveName" in l or "-cipherName" in l):
+                                pass
+                        elif "set ssl serviceGroup " in l:
+                                pass
                         else:
                                 not_processed.append(l)
         return g
